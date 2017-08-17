@@ -7,215 +7,19 @@ public class HouseCreatorBase : MonoBehaviour
     {
         Wall, HalfWall, Roof, HalfRoof, RoofEnd, HalfRoofEnd, Unsorted, None, Filler
     }
-    private class GridPoint
-    {
-        public PointType Type;
-        public Vector3 Location;
-        public Vector3 Dir;
-        public bool IsCorner = false;
 
-        public bool IsHalf()
-        {
-            if (Type == PointType.HalfWall) return true;
-            if (Type == PointType.HalfRoof) return true;
-            if (Type == PointType.HalfRoofEnd) return true;
-
-            return false;
-        }
-
-        public bool IsRoofType()
-        {
-            if (Type == PointType.HalfRoof) return true;
-            if (Type == PointType.HalfRoofEnd) return true;
-            if (Type == PointType.Roof) return true;
-            if (Type == PointType.RoofEnd) return true;
-
-            return false;
-        }
-
-        public GridPoint(PointType PT, Vector3 L)
-        {
-            Type = PT;
-            Location = L;
-            Dir = Vector3.zero;
-        }
-
-        public GridPoint GetNeighbor(Vector3 Dir, List<GridPoint> grid) {
-            foreach (GridPoint p in grid)
-            {
-                if (p.Location == Location + Dir)
-                {
-                    return p;
-                }
-            }
-
-            return null;
-        }
-        
-        public PointType GetNeighborType(Vector3 Dir, List<GridPoint> grid)
-        {
-            foreach (GridPoint p in grid)
-            {
-                if (p.Location == Location + Dir)
-                {
-                    return p.Type;
-                }
-            }
-
-            return PointType.None;
-
-        }
-
-        public bool IsPointValid()
-        {
-            if (Type == PointType.None)
-                return false;
-            if (Type == PointType.Filler)
-                return false;
-
-            return true;
-        }
-
-        public bool IsPointPlaceable()
-        {
-            if (Type != PointType.None)
-                return false;
-            if (Type != PointType.Filler)
-                return false;
-            if (Type != PointType.Unsorted)
-                return false;
-
-            return true;
-        }
-
-        public GameObject CreateGridObject(Transform parent, HouseCreatorCollection selectedCollection)
-        {
-            if (Type == PointType.Filler || Type == PointType.None)
-                return null;
-
-            GameObject GridObject = new GameObject("GridObject");
-
-            MeshFilter mf = GridObject.AddComponent<MeshFilter>();
-            MeshRenderer mr = GridObject.AddComponent<MeshRenderer>();
-
-            GridObject.transform.position = Location + parent.position;
-            GridObject.transform.SetParent(parent);
-            GridObject.transform.localRotation = Quaternion.LookRotation(Dir);
-            GridObject.transform.Rotate(new Vector3(0, -90f, 0));
-
-            Mesh m = selectedCollection.GetMeshBasedOnPointType(Type);
-            mf.mesh = m;
-
-            mr.sharedMaterial = selectedCollection.DefaultMat;
-
-            if (IsCorner && !IsRoofType())
-            {
-                GameObject cornerObject = CreateCornerObject(parent, selectedCollection, GridObject.transform);
-                cornerObject.transform.SetParent(GridObject.transform);
-            }
-
-            return GridObject;
-        }
-
-        //TODO: Do this
-        public GameObject CreateCornerObject(Transform parent, HouseCreatorCollection selectedCollection, Transform GridObject)
-        {
-            GameObject CornerObject = new GameObject("Corner Pillar");
-
-            CornerObject.transform.position = Location + parent.position;
-            CornerObject.transform.SetParent(GridObject, true);
-
-            MeshFilter mf = CornerObject.AddComponent<MeshFilter>();
-            MeshRenderer mr = CornerObject.AddComponent<MeshRenderer>();
-
-            Mesh m = selectedCollection.GetRandomCorner();
-            mf.mesh = m;
-
-            mr.sharedMaterial = selectedCollection.DefaultMat;
-
-            return CornerObject;
-        }
-
-        #region DrawDebug
-        public void DrawDebug(Vector3 ParentPos)
-        {
-
-            DrawDebugType(ParentPos);
-            if (IsCorner)
-                DrawDirection(ParentPos);
-        }
-
-        void DrawDirection(Vector3 ParentPos)
-        {
-            if (Dir == Vector3.zero)
-            {
-                if (IsPointPlaceable())
-                {
-                    Gizmos.color = Color.red;
-                    Gizmos.DrawCube(ParentPos + Location, Vector3.one * 0.2f);
-                }
-            } else
-            {
-                Vector3 Size = Vector3.Scale(Vector3.one * 0.25f, Dir) + Vector3.one * 0.02f;
-                Gizmos.color = Color.yellow;
-                Gizmos.DrawCube(ParentPos + Location + Dir * 0.125f, Size);
-            }
-        }
-        
-        void DrawDebugType(Vector3 ParentPos)
-        {
-            if (Type == PointType.Wall)
-            {
-                Gizmos.color = Color.yellow;
-                Gizmos.DrawSphere(ParentPos + Location, .075f);
-            }
-            else if (Type == PointType.HalfWall)
-            {
-                Gizmos.color = Color.blue;
-                Gizmos.DrawSphere(ParentPos + Location, .075f);
-            }
-            else if (Type == PointType.Roof)
-            {
-                Gizmos.color = Color.yellow;
-                Gizmos.DrawWireSphere(ParentPos + Location, .075f);
-            }
-            else if (Type == PointType.HalfRoof)
-            {
-                Gizmos.color = Color.blue;
-                Gizmos.DrawWireSphere(ParentPos + Location, .075f);
-            }
-            else if (Type == PointType.Unsorted)
-            {
-                Gizmos.color = new Color(0, 0, 0, 0.5f);
-                Gizmos.DrawSphere(ParentPos + Location, .075f);
-            }
-            else if (Type == PointType.None)
-            {
-                Gizmos.color = Color.red;
-                Gizmos.DrawSphere(ParentPos + Location, .075f);
-            }
-            else if(Type == PointType.Filler)
-            {
-                Gizmos.color = Color.magenta;
-                Gizmos.DrawSphere(ParentPos + Location, .075f);
-            }
-            else
-            {
-                Gizmos.color = Color.white;
-                Gizmos.DrawSphere(ParentPos + Location, .075f);
-            }
-
-            if(IsCorner == true)
-            {
-                Gizmos.color = Color.cyan;
-                Gizmos.DrawCube(ParentPos + Location, new Vector3(.05f, .05f, .05f));
-            }
-        }
-        #endregion
-    }
+    Vector3[] DirectionArray = new Vector3[4] {
+        new Vector3(1f, 0, 0),
+        new Vector3(0, 0, 1f),
+        new Vector3(-1f, 0, 0),
+        new Vector3(0, 0, -1f)
+    };
 
     [SerializeField]
     private List<GridPoint> Grid;
+
+    [SerializeField]
+    private List<RoofPlanes> roofPlanes;
     private HouseCreatorCollection HouseCollection;
 
     private float FloorHeight = 1f;
@@ -234,6 +38,7 @@ public class HouseCreatorBase : MonoBehaviour
         RemoveUnsusedPoints();
         SortGridPoints();
         FindCorners();
+        RecheckRoofCorners();
     }
 
     private void InstantiateGridPoints() {
@@ -310,13 +115,6 @@ public class HouseCreatorBase : MonoBehaviour
         //Finds starting grid point
         GridPoint CurrentGridPoint = FindCornerPoint(Grid,true);
 
-        Vector3[] DirectionArray = new Vector3[4] {
-            new Vector3(1f, 0, 0),
-             new Vector3(0, 0, 1f),
-            new Vector3(-1f, 0, 0),     
-            new Vector3(0, 0, -1f)
-        };
-
         GridPoint NextGridPoint = CurrentGridPoint;
 
         List<GridPoint> SelectedElevation = FindAllPointsOfSameElevation(CurrentGridPoint, Grid);
@@ -327,6 +125,8 @@ public class HouseCreatorBase : MonoBehaviour
         {
             IsBreaking = false;
             if (CurrentGridPoint.Type == PointType.Filler) { Debug.Log("FIlle is chosen"); break; }
+
+            //Looks thrugh Unsorted to find neighbor
             if (!CurrentGridPoint.IsPointPlaceable())
             {
                 for (int i = 0; i < 4; i++)
@@ -353,14 +153,17 @@ public class HouseCreatorBase : MonoBehaviour
                         }
                     }
                 }
+
+                //checks thrugh fulls to find neighthbor
                 for (int i = 0; i < 4; i++)
                 {
+                    if (IsBreaking) break;
+
                     GridPoint FullNeighbor = CurrentGridPoint.GetNeighbor(DirectionArray[i], SelectedElevation);
                     GridPoint HalfNeighbor = CurrentGridPoint.GetNeighbor(DirectionArray[i] * 0.5f, SelectedElevation);
                     if (FullNeighbor != null && FullNeighbor.IsPointValid())
                     {
-                        float FNdotGP = Vector3.Dot(DirectionArray[i], FullNeighbor.Dir);
-                        if (HalfNeighbor != null && HalfNeighbor.Type != PointType.Filler && FNdotGP != -1)
+                        if (HalfNeighbor != null && HalfNeighbor.Type != PointType.Filler && FullNeighbor.Dir * -1 != DirectionArray[i])
                         {
                             HalfNeighbor.Type = PointType.None;
                             RunThrughList.Remove(HalfNeighbor);
@@ -378,12 +181,14 @@ public class HouseCreatorBase : MonoBehaviour
                         }
                     }
                 }
+
+                //looks thrugh halfs to find neighbor
                 for (int i = 0; i < 4; i++)
                 {
                     if (IsBreaking) break;
 
                     GridPoint HalfNeighbor = CurrentGridPoint.GetNeighbor(DirectionArray[i] * 0.5f, SelectedElevation);
-                    if (HalfNeighbor != null && HalfNeighbor.IsPointValid())
+                    if (HalfNeighbor != null && HalfNeighbor.IsPointValid() && HalfNeighbor.Dir * -1 != DirectionArray[i])
                     {
                         if (CurrentGridPoint.GetNeighbor(new Vector3(0, 1f, 0), Grid) != null)
                             CurrentGridPoint.Type = PointType.HalfWall;
@@ -477,6 +282,63 @@ public class HouseCreatorBase : MonoBehaviour
         }
 
         return SelectedElevation;
+    }
+
+    void RecheckRoofCorners()
+    {
+        List<GridPoint> newPoints = new List<GridPoint>();
+        foreach (GridPoint gp in Grid)
+        {
+            if (!gp.IsPointValid())
+                continue;
+            if (gp.IsRoofType())
+                continue;
+
+            GridPoint NeighboorPoint = gp.GetNeighbor(gp.Dir, Grid, true);
+            if(NeighboorPoint != null)
+            {
+                if (NeighboorPoint.IsRoofType())
+                {
+                    GridPoint newGP = new GridPoint(PointType.Wall, gp.Location); ;
+                    newPoints.Add(newGP);
+
+                    if (gp.IsHalf())
+                    {
+                        gp.Type = PointType.HalfRoof;
+                    } else {
+                        gp.Type = PointType.Roof;
+                    }
+
+                    for (int i = 0; i < DirectionArray.Length; i++)
+                    {
+                        GridPoint g = newGP.GetNeighbor(DirectionArray[i], Grid, false);
+                        if(g != null)
+                        {
+                            if(g.IsPointValid() && !g.IsRoofType())
+                            {
+                                if(DirectionArray[i] * -1f != g.Dir)
+                                {
+                                    newGP.Dir = DirectionArray[i];
+                                    newGP.IsCorner = true;
+                                    g.IsCorner = true;
+                                }
+
+                            }
+                        }
+                    }
+                   
+                }
+            }
+        }
+
+        foreach(GridPoint gp in newPoints)
+        {
+            Grid.Add(gp);
+        }
+    }
+
+    void GenerateRoofPlanes() {
+        
     }
 
     private void SpawnArt()
