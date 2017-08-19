@@ -5,7 +5,7 @@ public class HouseCreatorBase : MonoBehaviour
 {
     public enum PointType
     {
-        Wall, HalfWall, Roof, HalfRoof, RoofEnd, HalfRoofEnd, Unsorted, None, Filler
+        Wall, HalfWall, Roof, HalfRoof, RoofEnd, HalfRoofEnd, Unsorted, None, None_SkipWall, None_SkipRoof, Filler
     }
 
     Vector3[] DirectionArray = new Vector3[4] {
@@ -19,7 +19,7 @@ public class HouseCreatorBase : MonoBehaviour
     private List<GridPoint> Grid;
 
     [SerializeField]
-    private List<RoofPlanes> roofPlanes;
+    private List<RoofPlane> roofPlanes;
     private HouseCreatorCollection HouseCollection;
 
     private float FloorHeight = 1f;
@@ -39,6 +39,7 @@ public class HouseCreatorBase : MonoBehaviour
         SortGridPoints();
         FindCorners();
         RecheckRoofCorners();
+        GenerateRoofPlanes();
     }
 
     private void InstantiateGridPoints() {
@@ -137,14 +138,18 @@ public class HouseCreatorBase : MonoBehaviour
                     {
                         if (HalfNeighbor != null && HalfNeighbor.Type != PointType.Filler)
                         {
-                            HalfNeighbor.Type = PointType.None;
-                            RunThrughList.Remove(HalfNeighbor);
-
                             if (CurrentGridPoint.GetNeighbor(new Vector3(0, 1f, 0), Grid) != null)
+                            {
                                 CurrentGridPoint.Type = PointType.Wall;
+                                HalfNeighbor.Type = PointType.None_SkipWall;
+                            }
                             else
+                            {
                                 CurrentGridPoint.Type = PointType.Roof;
-                            
+                                HalfNeighbor.Type = PointType.None_SkipRoof;
+                            }
+
+                            RunThrughList.Remove(HalfNeighbor);
 
                             CurrentGridPoint.Dir = DirectionArray[i];
                             NextGridPoint = FullNeighbor;
@@ -165,14 +170,18 @@ public class HouseCreatorBase : MonoBehaviour
                     {
                         if (HalfNeighbor != null && HalfNeighbor.Type != PointType.Filler && FullNeighbor.Dir * -1 != DirectionArray[i])
                         {
-                            HalfNeighbor.Type = PointType.None;
-                            RunThrughList.Remove(HalfNeighbor);
-
                             if (CurrentGridPoint.GetNeighbor(new Vector3(0, 1f, 0), Grid) != null)
+                            {
                                 CurrentGridPoint.Type = PointType.Wall;
+                                HalfNeighbor.Type = PointType.None_SkipWall;
+                            }
                             else
+                            {
                                 CurrentGridPoint.Type = PointType.Roof;
-                            
+                                HalfNeighbor.Type = PointType.None_SkipRoof;
+                            }
+
+                            RunThrughList.Remove(HalfNeighbor);
 
                             CurrentGridPoint.Dir = DirectionArray[i];
                             NextGridPoint = FullNeighbor;
@@ -307,6 +316,9 @@ public class HouseCreatorBase : MonoBehaviour
                         gp.Type = PointType.HalfRoof;
                     } else {
                         gp.Type = PointType.Roof;
+                        GridPoint HalfNeighboor = gp.GetNeighbor(gp.Dir * 0.5f, Grid, false);
+                        if (HalfNeighboor != null)
+                            HalfNeighboor.Type = PointType.None_SkipRoof;
                     }
 
                     for (int i = 0; i < DirectionArray.Length; i++)
@@ -321,6 +333,9 @@ public class HouseCreatorBase : MonoBehaviour
                                     newGP.Dir = DirectionArray[i];
                                     newGP.IsCorner = true;
                                     g.IsCorner = true;
+
+                                    GridPoint newEmptyRoofPoint = new GridPoint(PointType.None_SkipRoof, g.Location);
+                                    newPoints.Add(newEmptyRoofPoint);
                                 }
 
                             }
@@ -338,7 +353,74 @@ public class HouseCreatorBase : MonoBehaviour
     }
 
     void GenerateRoofPlanes() {
+        roofPlanes = new List<RoofPlane>();
+
+        List<GridPoint> ValidRoofPoints = new List<GridPoint>();
+        foreach (GridPoint gp in Grid)
+        {
+            if (!gp.IsWallType())
+                ValidRoofPoints.Add(gp);
+        }
+
+        foreach( GridPoint gp in ValidRoofPoints)
+        {
+            //Check initial square
+            if (CheckSquare(gp, ValidRoofPoints, Vector3.zero))
+            {
+                if (CheckSquare(gp, ValidRoofPoints, new Vector3(0, 0, 1)))
+                {
+                    int x = 1;
+                    int y = 1;
+
+                    bool RunningX = false;
+                    bool KeepLooping = true;
+
+                    while (KeepLooping)
+                    {
+                        if (RunningX)
+                        {
+                            for (int i = 0; i <= x; i++)
+                            {
+                                Vector3 Offset = new Vector3(i, 0, y) * 0.5f;
+                                if (!CheckSquare(gp, ValidRoofPoints, Offset)) {
+                                    KeepLooping = false;
+                                    break;
+                                }
+                            }
+
+                            x++;
+                            RunningX = false;
+                        } else
+                        {
+                            for (int i = 0; i <= y; i++)
+                            {
+                                Vector3 Offset = new Vector3(x, 0, i) * 0.5f;
+                                if (!CheckSquare(gp, ValidRoofPoints, Offset)) {
+                                    KeepLooping = false;
+                                break; }
+                            }
+
+                            y++;
+                            RunningX = true;
+                           
+                        }
+                    }
+
+                    RoofPlane newRP = new RoofPlane(gp.Location, new Vector3(x, 0, y));
+                    roofPlanes.Add(newRP);
+                }               
+            } 
+        }
+        Debug.Log(roofPlanes.Count);
+    }
+
+    bool CheckSquare(GridPoint StartPoint, List<GridPoint> grid, Vector3 Offset)
+    {
+        if (StartPoint.GetNeighbor(new Vector3(.5f, 0, 0) + Offset, grid) == null) return false;
+        if (StartPoint.GetNeighbor(new Vector3(0, 0, .5f) + Offset, grid) == null) return false;
+        if (StartPoint .GetNeighbor(new Vector3(.5f, 0, .5f) + Offset, grid) == null) return false;
         
+        return true;
     }
 
     private void SpawnArt()
@@ -366,6 +448,11 @@ public class HouseCreatorBase : MonoBehaviour
         foreach (GridPoint p in Grid)
         {
             p.DrawDebug(transform.position);
+        }
+
+        foreach (RoofPlane rp in roofPlanes)
+        {
+            rp.DrawDebug(transform);
         }
     }
 }

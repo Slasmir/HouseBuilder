@@ -24,28 +24,37 @@ public class GridPoint {
         if (Type == HouseCreatorBase.PointType.HalfRoofEnd) return true;
         if (Type == HouseCreatorBase.PointType.Roof) return true;
         if (Type == HouseCreatorBase.PointType.RoofEnd) return true;
+        if (Type == HouseCreatorBase.PointType.None_SkipRoof) return true;
+
+        return false;
+    }
+
+    public bool IsWallType()
+    {
+        if (Type == HouseCreatorBase.PointType.Wall) return true;
+        if (Type == HouseCreatorBase.PointType.HalfWall) return true;
+        if (Type == HouseCreatorBase.PointType.None_SkipWall) return true;
 
         return false;
     }
 
     public bool IsPointValid()
     {
-        if (Type == HouseCreatorBase.PointType.None)
-            return false;
-        if (Type == HouseCreatorBase.PointType.Filler)
-            return false;
+        if (Type == HouseCreatorBase.PointType.None) return false;
+        if (Type == HouseCreatorBase.PointType.Filler) return false;
+        if (Type == HouseCreatorBase.PointType.None_SkipRoof) return false;
+        if (Type == HouseCreatorBase.PointType.None_SkipWall) return false;
 
         return true;
     }
 
     public bool IsPointPlaceable()
     {
-        if (Type != HouseCreatorBase.PointType.None)
-            return false;
-        if (Type != HouseCreatorBase.PointType.Filler)
-            return false;
-        if (Type != HouseCreatorBase.PointType.Unsorted)
-            return false;
+        if (Type != HouseCreatorBase.PointType.None) return false;
+        if (Type != HouseCreatorBase.PointType.Filler)return false;
+        if (Type != HouseCreatorBase.PointType.Unsorted) return false;
+        if (Type == HouseCreatorBase.PointType.None_SkipRoof) return false;
+        if (Type == HouseCreatorBase.PointType.None_SkipWall) return false;
 
         return true;
     }
@@ -99,7 +108,7 @@ public class GridPoint {
 
     public GameObject CreateGridObject(Transform parent, HouseCreatorCollection selectedCollection)
     {
-        if (Type == HouseCreatorBase.PointType.Filler || Type == HouseCreatorBase.PointType.None)
+        if(!IsPointValid())
             return null;
 
         //TODO: FIX ROOF
@@ -202,10 +211,15 @@ public class GridPoint {
             Gizmos.color = new Color(0, 0, 0, 0.5f);
             Gizmos.DrawSphere(ParentPos + Location, .075f);
         }
-        else if (Type == HouseCreatorBase.PointType.None)
+        else if (Type == HouseCreatorBase.PointType.None_SkipWall)
         {
             Gizmos.color = Color.red;
             Gizmos.DrawSphere(ParentPos + Location, .075f);
+        }
+        else if (Type == HouseCreatorBase.PointType.None_SkipRoof)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(ParentPos + Location, .075f);
         }
         else if (Type == HouseCreatorBase.PointType.Filler)
         {

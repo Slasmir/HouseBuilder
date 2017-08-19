@@ -20,9 +20,12 @@ public class RoofPlane  {
     }
 
 
-    public void DrawRoofPlane(Transform parent)
+    private void DrawRoofPlane(Transform parent)
     {
+        float Areal = Size.x * Size.z;
+        float offset = Areal * 0.1f;
+        Vector3 Offset3dD = offset * Vector3.up;
         Gizmos.color = Color.red;
-        Gizmos.DrawCube(Origin + parent.position, Size + new Vector3(0, .03f, 0));
+        Gizmos.DrawCube(Origin + parent.position + (Size / 2f) + Offset3dD, Size + new Vector3(0, .03f, 0));
     }
 }
