@@ -33,13 +33,15 @@ public class HouseEditor : EditorWindow {
             }
 
             GameObject[] CurrentSelection = Selection.gameObjects;
-            if (CurrentSelection.LongLength != 0)
+            if (CurrentSelection.Length != 0)
             {
                 List<MeshFilter> allSelectedRenders = new List<MeshFilter>();
                 foreach(GameObject go in CurrentSelection)
                 {
                     if (go.GetComponent<Renderer>() != null)
                         allSelectedRenders.Add(go.GetComponent<MeshFilter>());
+
+                    go.SetActive(false);
                 }
 
                 if (allSelectedRenders.Count > 0)

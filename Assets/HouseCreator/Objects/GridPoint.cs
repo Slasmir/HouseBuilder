@@ -7,6 +7,7 @@ public class GridPoint {
     public HouseCreatorBase.PointType Type;
     public Vector3 Location;
     public Vector3 Dir;
+    public Vector3 ForcedScale = Vector3.one;
     public bool IsCorner = false;
 
     public bool IsHalf()
@@ -106,13 +107,13 @@ public class GridPoint {
 
 
 
-    public GameObject CreateGridObject(Transform parent, HouseCreatorCollection selectedCollection)
+    public GameObject CreateGridObject(Transform parent, HouseCreatorCollection selectedCollection, bool IgnoreRoof = true)
     {
         if(!IsPointValid())
             return null;
 
         //TODO: FIX ROOF
-        if (IsRoofType())
+        if (IgnoreRoof && IsRoofType())
             return null;
 
         GameObject GridObject = new GameObject("GridObject");
@@ -124,6 +125,7 @@ public class GridPoint {
         GridObject.transform.SetParent(parent);
         GridObject.transform.localRotation = Quaternion.LookRotation(Dir);
         GridObject.transform.Rotate(new Vector3(0, -90f, 0));
+        GridObject.transform.localScale = ForcedScale;
 
         Mesh m = selectedCollection.GetMeshBasedOnPointType(Type);
         mf.mesh = m;
