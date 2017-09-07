@@ -5,25 +5,49 @@ using System.Collections;
 public class HouseCreatorCollection : ScriptableObject
 {
 
-    public Mesh[] FullWall, HalfWall, FullRoofEnd, HalfRoofEnd, FullRoofEndTop, HalfRoofEndTop, FullRoofCenter, HalfRoofCenter, Corner;
+    public Mesh[] FullWall, HalfWall, FullRoofEnd, HalfRoofEnd, FullRoofEndTop, HalfRoofEndTop, FullRoofCenter, HalfRoofCenter, FullRoofCenterTop, HalfRoofCenterTop, FullRoofStopper, HalfRoofStopper, Corner;
     public Material DefaultMat;
 
-    public Mesh GetMeshBasedOnPointType(HouseCreatorBase.PointType pointType)
+    public Mesh GetMeshBasedOnPointType(HouseCreatorBase.PointType pointType, bool IsTop = false)
     {
         switch (pointType)
         {
             case HouseCreatorBase.PointType.Wall:
                 return GetRandomFullWall();
+
             case HouseCreatorBase.PointType.HalfWall:
                 return GetRandomHalfWall();
+
             case HouseCreatorBase.PointType.RoofEnd:
-                return GetRandomFullRoofEnd();
+                if (IsTop)
+                    return GetRandomFullRoofEndTop();
+                else
+                    return GetRandomFullRoofEnd();
+
             case HouseCreatorBase.PointType.HalfRoofEnd:
-                return GetRandomHalfRoofEnd();
+                if (IsTop)
+                    return GetRandomHalfRoofEndTop();
+                else
+                    return GetRandomHalfRoofEnd();
+
             case HouseCreatorBase.PointType.Roof:
-                return GetRandomFullRoofCenter();
+                if (IsTop)
+                    return GetRandomFullRoofCenterTop();
+                else
+                    return GetRandomFullRoofCenter();
+
             case HouseCreatorBase.PointType.HalfRoof:
-                return GetRandomHalfRoofCenter();
+                if (IsTop)
+                    return GetRandomHalfRoofCenterTop();
+                else 
+                    return GetRandomHalfRoofCenter();
+
+            case HouseCreatorBase.PointType.RoofStopper:
+                return GetRandomFullRoofStopper();
+
+            case HouseCreatorBase.PointType.HalfRoofStopper:
+                return GetRandomHalfRoofStopper();
+
             default:
                 return null;
         }
@@ -77,4 +101,25 @@ public class HouseCreatorCollection : ScriptableObject
     {
         return Corner[Random.Range(0, Corner.Length - 1)];
     }
+
+    public Mesh GetRandomFullRoofStopper()
+    {
+        return FullRoofStopper[Random.Range(0, FullRoofStopper.Length - 1)];
+    }
+
+    public Mesh GetRandomHalfRoofStopper()
+    {
+        return HalfRoofStopper[Random.Range(0, HalfRoofStopper.Length - 1)];
+    }
+
+    public Mesh GetRandomFullRoofCenterTop()
+    {
+        return FullRoofCenterTop[Random.Range(0, FullRoofCenterTop.Length - 1)];
+    }
+
+    public Mesh GetRandomHalfRoofCenterTop()
+    {
+        return HalfRoofCenterTop[Random.Range(0, HalfRoofCenterTop.Length - 1)];
+    }
 }
+

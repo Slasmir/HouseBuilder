@@ -8,11 +8,13 @@ public class RoofPlane
     Vector3 Origin;
     Vector3 Size;
     Vector3 Dir;
+    bool Upstairs;
 
-    public RoofPlane(Vector3 _origin, Vector3 _size)
+    public RoofPlane(Vector3 _origin, Vector3 _size, bool _Upstairs = false)
     {
         Origin = _origin;
         Size = _size;
+        Upstairs = _Upstairs;
         FindDirection();
     }
 
@@ -42,6 +44,29 @@ public class RoofPlane
     public float GetArea()
     {
         return Size.x * Size.z;
+    }
+
+    public float GetLength()
+    {
+        if(Size.x > Size.z)
+        {
+            return Size.x;
+        }
+        else
+        {
+            return Size.z;
+        }
+    }
+
+    public float GetWidth()
+    {
+        if(Size.x > Size.z) {
+            return Size.z;
+        }
+        else
+        {
+            return Size.x;
+        }
     }
 
     Rect CreateRectFromRoofPlane(RoofPlane rp)
@@ -83,7 +108,8 @@ public class RoofPlane
             TestSize = Size.z;
             NonTestedSize = new Vector3(Size.x, 0, 0);
             Dir *= -1;
-            Origin = Origin + new Vector3(0,0, Size.z);
+            if(Upstairs == false)
+                Origin = Origin + new Vector3(0,0, Size.z);
         }
 
         //Generating Roofs on one side
@@ -149,11 +175,75 @@ public class RoofPlane
 
         foreach (GridPoint gp in PointsToSpawn)
         {
+            if (Upstairs)
+                gp.IsTop = true;
+
             gp.CreateGridObject(Roof.transform, collection, false);
         }
+        CreateSidePices(Roof.transform, collection);
+        CreateUpstairsRoofPlain(Roof.transform, collection);
 
         Roof.transform.SetParent(parent);
         return Roof;
+    }
+
+    public void CreateUpstairsRoofPlain(Transform parent, HouseCreatorCollection collection)
+    {
+        if (GetWidth() > 1f)
+        {
+            Vector3 ScaleDir;
+            if (Dir == new Vector3(1, 0, 0))
+                ScaleDir = new Vector3(0, 0, 1);
+            else
+                ScaleDir = new Vector3(1, 0, 0);
+
+            //TODO: Magic number deciding Roof height
+            Vector3 NewOrigin = Origin + ScaleDir * .5f + Vector3.up *.75f;
+            Vector3 NewSize = Size - ScaleDir;
+
+            RoofPlane newRoofPlane = new RoofPlane(NewOrigin, NewSize, true);
+            newRoofPlane.CreateRoof(parent, collection);
+        }
+    }
+
+    public void CreateSidePices(Transform parent, HouseCreatorCollection collection)
+    {
+        float width = GetWidth();
+        width -= 1f;
+
+        Vector3 ScaleDir;
+        if (Dir == new Vector3(1, 0, 0))
+            ScaleDir = new Vector3(0, 0, 1);
+        else
+            ScaleDir = new Vector3(1, 0, 0);
+
+        List<GridPoint> pointsToSpawn = new List<GridPoint>();
+        for (int i = 0; i < width; i++)
+        {
+            //Front
+            GridPoint newGP = new GridPoint(HouseCreatorBase.PointType.RoofStopper, Origin + (ScaleDir * 0.5f) + (ScaleDir * i));
+            newGP.Dir = ScaleDir;
+            newGP.ForcedScale = new Vector3(1, 1, -1f);
+            pointsToSpawn.Add(newGP);
+
+            //back
+            newGP = new GridPoint(HouseCreatorBase.PointType.RoofStopper, Origin + (ScaleDir * 0.5f) + (ScaleDir * i) + (Dir * GetLength()));
+            newGP.Dir = ScaleDir;
+            pointsToSpawn.Add(newGP);
+        }
+
+        if (width % 1 != 0)
+        {
+            GridPoint newGP = new GridPoint(HouseCreatorBase.PointType.HalfRoofStopper, Origin + (ScaleDir * 0.5f) + (ScaleDir * (width - 1f)));
+            newGP.Dir = ScaleDir;
+            newGP.ForcedScale = new Vector3(1, 1, -1f);
+            pointsToSpawn.Add(newGP);
+        }
+
+        foreach (GridPoint gp in pointsToSpawn)
+        {
+            gp.CreateGridObject(parent.transform, collection, false);
+        }
     }
 
     private GameObject CreateOneAreaRoof(Transform parent, HouseCreatorCollection collection)
@@ -197,6 +287,9 @@ public class RoofPlane
 
         foreach (GridPoint gp in PointsToSpawn)
         {
+            if (Upstairs)
+                gp.IsTop = true;
+
             gp.CreateGridObject(Roof.transform, collection, false);
         }
 
@@ -227,5 +320,8 @@ public class RoofPlane
             Gizmos.color = Color.red;
             Gizmos.DrawCube(Origin - new Vector3(0,0,Size.z)  + parent.position + (Size / 2f) + Vector3.up * .05f, Size + new Vector3(0, .03f, 0));
         }
+
+        Gizmos.color = Color.black;
+        Gizmos.DrawCube(Origin + parent.position, new Vector3(0.15f, 0.15f, 0.15f));
     }
 }

@@ -69,6 +69,13 @@ ModelImporter:
     100122: FullEndRoofTop_001
     100124: FullRoofCenter
     100126: HalfRoofTop
+    100128: FullRoofCenter_002
+    100130: FullRoofStopper
+    100132: HalfRoofCenter
+    100134: HalfRoofStopper
+    100136: FullRoofCenterTop
+    100138: FullRoofCenterTop_001
+    100140: HalfRoofCenterTop
     400000: Cube
     400002: Cube_001
     400004: Cube_002
@@ -133,6 +140,13 @@ ModelImporter:
     400122: FullEndRoofTop_001
     400124: FullRoofCenter
     400126: HalfRoofTop
+    400128: FullRoofCenter_002
+    400130: FullRoofStopper
+    400132: HalfRoofCenter
+    400134: HalfRoofStopper
+    400136: FullRoofCenterTop
+    400138: FullRoofCenterTop_001
+    400140: HalfRoofCenterTop
     2300000: Cube
     2300002: Cube_001
     2300004: Cube_002
@@ -196,6 +210,13 @@ ModelImporter:
     2300120: FullEndRoofTop_001
     2300122: FullRoofCenter
     2300124: HalfRoofTop
+    2300126: FullRoofCenter_002
+    2300128: FullRoofStopper
+    2300130: HalfRoofCenter
+    2300132: HalfRoofStopper
+    2300134: FullRoofCenterTop
+    2300136: FullRoofCenterTop_001
+    2300138: HalfRoofCenterTop
     3300000: Cube
     3300002: Cube_001
     3300004: Cube_002
@@ -259,6 +280,13 @@ ModelImporter:
     3300120: FullEndRoofTop_001
     3300122: FullRoofCenter
     3300124: HalfRoofTop
+    3300126: FullRoofCenter_002
+    3300128: FullRoofStopper
+    3300130: HalfRoofCenter
+    3300132: HalfRoofStopper
+    3300134: FullRoofCenterTop
+    3300136: FullRoofCenterTop_001
+    3300138: HalfRoofCenterTop
     4300000: Cube_021
     4300002: Cube_020
     4300004: Cube_019
@@ -322,6 +350,13 @@ ModelImporter:
     4300120: FullEndRoofTop_001
     4300122: FullRoofCenter
     4300124: HalfRoofTop
+    4300126: HalfRoofCenter
+    4300128: FullRoofCenter_002
+    4300130: FullRoofStopper
+    4300132: HalfRoofStopper
+    4300134: FullRoofCenterTop
+    4300136: FullRoofCenterTop_001
+    4300138: HalfRoofCenterTop
     7400000: Default Take
     9500000: //RootNode
   materials:
@@ -334,6 +369,8 @@ ModelImporter:
     resampleCurves: 1
     optimizeGameObjects: 0
     motionNodeName: 
+    rigImportErrors: 
+    rigImportWarnings: 
     animationImportErrors: 
     animationImportWarnings: 
     animationRetargetingWarnings: 
@@ -370,6 +407,7 @@ ModelImporter:
   importAnimation: 1
   copyAvatar: 0
   humanDescription:
+    serializedVersion: 2
     human: []
     skeleton: []
     armTwist: 0.5
@@ -380,7 +418,10 @@ ModelImporter:
     legStretch: 0.05
     feetSpacing: 0
     rootMotionBoneName: 
+    rootMotionBoneRotation: {x: 0, y: 0, z: 0, w: 1}
     hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 0
   lastHumanDescriptionAvatarSource: {instanceID: 0}
   animationType: 2
   humanoidOversampling: 1

@@ -6,14 +6,14 @@ public class HouseCreatorBase : MonoBehaviour
 {
     public enum PointType
     {
-        Wall, HalfWall, Roof, HalfRoof, RoofEnd, HalfRoofEnd, Unsorted, None, None_SkipWall, None_SkipRoof, Filler
+        Wall, HalfWall, Roof, HalfRoof, RoofEnd, HalfRoofEnd, RoofStopper, HalfRoofStopper, Unsorted, None, None_SkipWall, None_SkipRoof, Filler
     }
 
-    Vector3[] DirectionArray = new Vector3[4] {
-        new Vector3(1f, 0, 0),
+    Vector3[] DirectionArray = new Vector3[] {
         new Vector3(0, 0, -1f),
-        new Vector3(-1f, 0, 0),
-        new Vector3(0, 0, 1f)
+        new Vector3(1f, 0, 0),
+        new Vector3(0, 0, 1f),
+        new Vector3(-1f, 0, 0) 
     };
 
     [SerializeField]
@@ -40,6 +40,7 @@ public class HouseCreatorBase : MonoBehaviour
         InstantiateGridPoints();
         RemoveUnsusedPoints();
         SortGridPoints();
+        FlipMirroredWalls();
         FindCorners();
         RecheckRoofCorners();
         GenerateRoofPlanes();
@@ -109,7 +110,7 @@ public class HouseCreatorBase : MonoBehaviour
     }
 
     void SortGridPoints() {
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < 200; i++)
         {
             SortGridPointsPrElevation();
         }
@@ -134,7 +135,7 @@ public class HouseCreatorBase : MonoBehaviour
             //Looks thrugh Unsorted to find neighbor
             if (!CurrentGridPoint.IsPointPlaceable())
             {
-                for (int i = 0; i < 4; i++)
+                for (int i = 0; i < DirectionArray.Length; i++)
                 {
                     GridPoint FullNeighbor = CurrentGridPoint.GetNeighbor(DirectionArray[i], SelectedElevation);
                     GridPoint HalfNeighbor = CurrentGridPoint.GetNeighbor(DirectionArray[i] * 0.5f, SelectedElevation);
@@ -164,7 +165,7 @@ public class HouseCreatorBase : MonoBehaviour
                 }
 
                 //checks thrugh fulls to find neighthbor
-                for (int i = 0; i < 4; i++)
+                for (int i = 0; i < DirectionArray.Length; i++)
                 {
                     if (IsBreaking) break;
 
@@ -196,7 +197,7 @@ public class HouseCreatorBase : MonoBehaviour
                 }
 
                 //looks thrugh halfs to find neighbor
-                for (int i = 0; i < 4; i++)
+                for (int i = 0; i < DirectionArray.Length; i++)
                 {
                     if (IsBreaking) break;
 
@@ -226,8 +227,25 @@ public class HouseCreatorBase : MonoBehaviour
                 }
             }
             if (RunThrughList.Count != 0)
-                CurrentGridPoint = RunThrughList[0];
+                CurrentGridPoint = FindCornerPoint(RunThrughList, true);
 
+        }
+    }
+
+    void FlipMirroredWalls()
+    {
+        foreach(GridPoint gp in Grid)
+        {
+            if (!gp.IsWallType()) continue;
+
+            //vector = Quaternion.Euler(0, -45, 0) * vector;
+            Vector3 TestDir1 = Quaternion.Euler(0, 90f, 0) * gp.Dir;
+            Vector3 TestDir2 = Quaternion.Euler(0, -90f, 0) * gp.Dir;
+            if(gp.GetNeighbor(TestDir1 * 0.5f, Grid) != null)
+            {
+                if(gp.GetNeighbor(TestDir2 * 0.5f,Grid) == null)
+                    gp.ForcedScale = new Vector3(1f, 1f, -1f); 
+            }
         }
     }
 
@@ -386,81 +404,89 @@ public class HouseCreatorBase : MonoBehaviour
                 ValidRoofPoints.Add(gp);
         }
 
-        foreach( GridPoint gp in ValidRoofPoints)
+        foreach(GridPoint vrp in ValidRoofPoints)
         {
+            //X --> Y
             int x = 0;
             int y = 0;
 
-            while (true)
+            bool Loop = true;
+            while (Loop)
             {
-                if (!CheckSquare(gp, ValidRoofPoints, new Vector3(x, 0, y) * .5f))
-                    break;
-                else
-                    x++;
-            }
-
-            bool breakout = false;
-            while (!breakout)
-            {
-                if (x == 0) break;
-                for (int i = 0; i < x; i++)
+                if (!CheckSquare(vrp, ValidRoofPoints, new Vector3(x, 0, y) * .5f))
                 {
-                    if (!CheckSquare(gp, ValidRoofPoints, new Vector3(i, 0, y) * .5f))
+                    Loop = false;
+                    break;
+                }
+                x++;
+
+                bool LoopY = true;
+                while (LoopY)
+                {
+                    if (x == 0) { y++; break; }
+
+                    for (int i = 0; i < x; i++)
                     {
-                        breakout = true;
-                        break;
+                        if (!CheckSquare(vrp, ValidRoofPoints, new Vector3(i, 0, y) * .5f))
+                        {
+                            LoopY = false;
+                            break;
+                        }
                     }
+
+                    if (!LoopY)
+                        break;
+
+                    y++;
                 }
 
-                if (breakout)
-                    break;
+                RoofPlane rp = new RoofPlane(vrp.Location, new Vector3(x, 0, y) * .5f);
+                roofPlanes.Add(rp);
+                
 
-                y++;
+                y = 0;
             }
 
-            RoofPlane XRoofPlane = new RoofPlane(gp.Location, new Vector3(x, 0, y) * .5f);
-            roofPlanes.Add(XRoofPlane);
-            
+            //Y --> X
             x = 0;
             y = 0;
 
-            while (true)
+            Loop = true;
+            while (Loop)
             {
-                if (!CheckSquare(gp, ValidRoofPoints, new Vector3(x, 0, y)))
-                    break;
-                else
-                    y++;
-            }
-
-            breakout = false;
-            while (!breakout)
-            {
-                if (y == 0)
-                    break;
-
-                for (int i = 0; i < y; i++)
+                if (!CheckSquare(vrp, ValidRoofPoints, new Vector3(x, 0, y) * .5f))
                 {
-                    if (!CheckSquare(gp, ValidRoofPoints, new Vector3(i, 0, y)))
+                    Loop = false;
+                    break;
+                }
+                y++;
+
+                bool LoopY = true;
+                while (LoopY)
+                {
+                    if (y == 0) { x++; break; }
+
+                    for (int i = 0; i < y; i++)
                     {
-                        breakout = true;
-                        break;
+                        if (!CheckSquare(vrp, ValidRoofPoints, new Vector3(x, 0, i) * .5f))
+                        {
+                            LoopY = false;
+                            break;
+                        }
                     }
+
+                    if (!LoopY)
+                        break;
+
+                    x++;
                 }
 
-                if (breakout)
-                    break;
+                RoofPlane rp = new RoofPlane(vrp.Location, new Vector3(x, 0, y) * .5f);
+                roofPlanes.Add(rp);
 
-                x++;
+
+                x = 0;
             }
-
-            RoofPlane YRoofPlane = new RoofPlane(gp.Location, new Vector3(x, 0, y) * .5f);
-
-            if (XRoofPlane.GetArea() > YRoofPlane.GetArea())
-                roofPlanes.Add(XRoofPlane);
-            else
-                roofPlanes.Add(YRoofPlane);
-                
-
         }
 
         roofPlanes = roofPlanes.OrderByDescending(o => o.GetArea()).ToList();
