@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2015
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HouseBuilder_git", "HouseBuilder_git.csproj", "{16F49A1C-EDDA-A017-FC77-F1AE04B2DEA0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HouseBuilder_git.CSharp", "HouseBuilder_git.CSharp.csproj", "{77344D84-202D-426E-1915-C8FAB660226E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HouseBuilder_git.Editor", "HouseBuilder_git.Editor.csproj", "{ABA23C7F-C759-2DBB-3A1C-F61D4437DA3A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HouseBuilder_git.CSharp.Editor", "HouseBuilder_git.CSharp.Editor.csproj", "{BD0666E1-3D35-729A-B92C-49F87F3B40C7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,14 +11,14 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{16F49A1C-EDDA-A017-FC77-F1AE04B2DEA0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{16F49A1C-EDDA-A017-FC77-F1AE04B2DEA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{16F49A1C-EDDA-A017-FC77-F1AE04B2DEA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{16F49A1C-EDDA-A017-FC77-F1AE04B2DEA0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{ABA23C7F-C759-2DBB-3A1C-F61D4437DA3A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{ABA23C7F-C759-2DBB-3A1C-F61D4437DA3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{ABA23C7F-C759-2DBB-3A1C-F61D4437DA3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{ABA23C7F-C759-2DBB-3A1C-F61D4437DA3A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{77344D84-202D-426E-1915-C8FAB660226E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77344D84-202D-426E-1915-C8FAB660226E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77344D84-202D-426E-1915-C8FAB660226E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77344D84-202D-426E-1915-C8FAB660226E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BD0666E1-3D35-729A-B92C-49F87F3B40C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BD0666E1-3D35-729A-B92C-49F87F3B40C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BD0666E1-3D35-729A-B92C-49F87F3B40C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BD0666E1-3D35-729A-B92C-49F87F3B40C7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -5,10 +5,10 @@ using System.Collections;
 public class HouseCreatorCollection : ScriptableObject
 {
 
-    public Mesh[] FullWall, HalfWall, FullRoofEnd, HalfRoofEnd, FullRoofEndTop, HalfRoofEndTop, FullRoofCenter, HalfRoofCenter, FullRoofCenterTop, HalfRoofCenterTop, FullRoofStopper, HalfRoofStopper, Corner;
+    public Mesh[] FullWall, HalfWall, FullRoofEnd, HalfRoofEnd, FullRoofEndTop, HalfRoofEndTop, FullRoofCenter, HalfRoofCenter, FullRoofCenterTop, HalfRoofCenterTop, FullRoofTopper, FullRoofTopperEnd, HalfRoofTopper, HalfRoofTopperEnd, FullRoofStopper, HalfRoofStopper, Corner;
     public Material DefaultMat;
 
-    public Mesh GetMeshBasedOnPointType(HouseCreatorBase.PointType pointType, bool IsTop = false)
+    public Mesh GetMeshBasedOnPointType(HouseCreatorBase.PointType pointType, bool IsTop = false, bool IsSmall = false)
     {
         switch (pointType)
         {
@@ -19,24 +19,32 @@ public class HouseCreatorCollection : ScriptableObject
                 return GetRandomHalfWall();
 
             case HouseCreatorBase.PointType.RoofEnd:
+                if (IsSmall)
+                    return GetRandomFullRoofTopperEnd();
                 if (IsTop)
                     return GetRandomFullRoofEndTop();
                 else
                     return GetRandomFullRoofEnd();
 
             case HouseCreatorBase.PointType.HalfRoofEnd:
+                if (IsSmall)
+                    return GetRandomHalfRoofTopperEnd();
                 if (IsTop)
                     return GetRandomHalfRoofEndTop();
                 else
                     return GetRandomHalfRoofEnd();
 
             case HouseCreatorBase.PointType.Roof:
+                if (IsSmall)
+                    return GetRandomFullRoofTopper();
                 if (IsTop)
                     return GetRandomFullRoofCenterTop();
                 else
                     return GetRandomFullRoofCenter();
 
             case HouseCreatorBase.PointType.HalfRoof:
+                if (IsSmall)
+                    return GetRandomHalfRoofTopper();
                 if (IsTop)
                     return GetRandomHalfRoofCenterTop();
                 else 
@@ -120,6 +128,26 @@ public class HouseCreatorCollection : ScriptableObject
     public Mesh GetRandomHalfRoofCenterTop()
     {
         return HalfRoofCenterTop[Random.Range(0, HalfRoofCenterTop.Length - 1)];
+    }
+
+    public Mesh GetRandomFullRoofTopper()
+    {
+        return FullRoofTopper[Random.Range(0, FullRoofTopper.Length - 1)];
+    }
+    
+    public Mesh GetRandomHalfRoofTopper()
+    {
+        return HalfRoofTopper[Random.Range(0, HalfRoofTopper.Length - 1)];
+    }
+
+    public Mesh GetRandomFullRoofTopperEnd()
+    {
+        return FullRoofTopperEnd[Random.Range(0, FullRoofTopperEnd.Length - 1)];
+    }
+    
+    public Mesh GetRandomHalfRoofTopperEnd()
+    {
+        return HalfRoofTopperEnd[Random.Range(0, HalfRoofTopperEnd.Length - 1)];
     }
 }
 

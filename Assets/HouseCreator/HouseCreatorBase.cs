@@ -45,6 +45,7 @@ public class HouseCreatorBase : MonoBehaviour
         RecheckRoofCorners();
         GenerateRoofPlanes();
         SortRoofPlanes();
+        RecheckPoints();
     }
 
     private void InstantiateGridPoints() {
@@ -130,7 +131,7 @@ public class HouseCreatorBase : MonoBehaviour
         while (RunThrughList.Count > 0)
         {
             IsBreaking = false;
-            if (CurrentGridPoint.Type == PointType.Filler) { Debug.Log("FIlle is chosen"); break; }
+            if (CurrentGridPoint.Type == PointType.Filler) { Debug.LogWarning("FIlle is chosen"); break; }
 
             //Looks thrugh Unsorted to find neighbor
             if (!CurrentGridPoint.IsPointPlaceable())
@@ -519,6 +520,53 @@ public class HouseCreatorBase : MonoBehaviour
         }
 
         roofPlanes = UseablePlanes;
+    }
+
+
+    //Closes open edges
+    void RecheckPoints()
+    {
+        List<GridPoint> ValidCheckPoints = new List<GridPoint>();
+        foreach(GridPoint gp in Grid)
+        {
+            if(gp.IsRoofType() || gp.Type == PointType.Filler)
+            {
+                ValidCheckPoints.Add(gp);
+            }
+        }
+
+        List<GridPoint> PointsToRemove = new List<GridPoint>();
+        foreach(GridPoint gp in ValidCheckPoints)
+        {
+            GridPoint Neighboor = gp.GetNeighbor(new Vector3(0, 1f, 0), Grid);
+            if (Neighboor != null && Neighboor.IsRoofType())
+            {
+                if (Neighboor.Type == PointType.HalfRoof)
+                {
+                    gp.Type = PointType.HalfWall;
+                    gp.Dir = Neighboor.Dir;
+                }
+                else if (Neighboor.Type == PointType.Roof)
+                {
+                    gp.Type = PointType.Wall;
+                    gp.Dir = Neighboor.Dir;
+                }
+                else
+                    PointsToRemove.Add(gp);
+            }
+            else
+                PointsToRemove.Add(gp);
+        }
+
+        foreach(GridPoint gp in PointsToRemove)
+        {
+            ValidCheckPoints.Remove(gp);
+        }
+
+        foreach(GridPoint gp in ValidCheckPoints)
+        {
+            gp.CreateGridObject(this.transform, HouseCollection);
+        }
     }
 
     bool CheckSquare(GridPoint StartPoint, List<GridPoint> grid, Vector3 Offset)

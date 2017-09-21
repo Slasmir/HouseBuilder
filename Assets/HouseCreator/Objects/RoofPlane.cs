@@ -141,42 +141,47 @@ public class RoofPlane
             PointsToSpawn.Add(gp);
         }
 
-
-        //Generating Roofs on the other side
-        for (int i = (int)Mathf.Floor(TestSize); i > 0; i--)
+        if (GetWidth() >= 1f)
         {
-            HouseCreatorBase.PointType Type = HouseCreatorBase.PointType.Roof;
-            if (i == 1 || (i == Mathf.Floor(TestSize) && Mathf.Floor(TestSize) == TestSize))
-                Type = HouseCreatorBase.PointType.RoofEnd;
 
-            GridPoint gp;
-            if ((i == Mathf.Floor(TestSize) && Mathf.Floor(TestSize) == TestSize))
+            //Generating Roofs on the other side
+            for (int i = (int)Mathf.Floor(TestSize); i > 0; i--)
             {
-                gp = new GridPoint(Type, Origin + NonTestedSize + Dir * (i - 1));
+                HouseCreatorBase.PointType Type = HouseCreatorBase.PointType.Roof;
+                if (i == 1 || (i == Mathf.Floor(TestSize) && Mathf.Floor(TestSize) == TestSize))
+                    Type = HouseCreatorBase.PointType.RoofEnd;
+
+                GridPoint gp;
+                if ((i == Mathf.Floor(TestSize) && Mathf.Floor(TestSize) == TestSize))
+                {
+                    gp = new GridPoint(Type, Origin + NonTestedSize + Dir * (i - 1));
+                    gp.ForcedScale = FlipScale;
+                }
+                else
+                {
+                    gp = new GridPoint(Type, Origin + NonTestedSize + Dir * i);
+                }
+
+                gp.Dir = Dir * -1f;
+                PointsToSpawn.Add(gp);
+            }
+
+            if (Mathf.Floor(TestSize) != TestSize)
+            {
+                GridPoint gp = new GridPoint(HouseCreatorBase.PointType.HalfRoofEnd, Origin + Dir * TestSize + NonTestedSize - Dir * 0.5f);
                 gp.ForcedScale = FlipScale;
+                gp.Dir = Dir * -1f;
+                PointsToSpawn.Add(gp);
             }
-            else
-            {
-                gp = new GridPoint(Type, Origin + NonTestedSize + Dir * i);
-            }
-
-            gp.Dir = Dir * -1f;
-            PointsToSpawn.Add(gp);
         }
-
-        if (Mathf.Floor(TestSize) != TestSize)
-        {
-            GridPoint gp = new GridPoint(HouseCreatorBase.PointType.HalfRoofEnd, Origin + Dir * TestSize + NonTestedSize - Dir * 0.5f);
-            gp.ForcedScale = FlipScale;
-            gp.Dir = Dir * -1f;
-            PointsToSpawn.Add(gp);
-        }
-
 
         foreach (GridPoint gp in PointsToSpawn)
         {
             if (Upstairs)
                 gp.IsTop = true;
+
+            if (GetWidth() < 1)
+                gp.IsSmall = true;
 
             gp.CreateGridObject(Roof.transform, collection, false);
         }
@@ -218,10 +223,12 @@ public class RoofPlane
             ScaleDir = new Vector3(1, 0, 0);
 
         List<GridPoint> pointsToSpawn = new List<GridPoint>();
-        for (int i = 0; i < width; i++)
+        float LoopRunning = width;
+        if (width % 1 != 0) LoopRunning -= 1f; 
+        for (int i = 0; i < LoopRunning; i++)
         {
             //Front
-            GridPoint newGP = new GridPoint(HouseCreatorBase.PointType.RoofStopper, Origin + (ScaleDir * 0.5f) + (ScaleDir * i));
+            GridPoint newGP = new GridPoint(HouseCreatorBase.PointType.RoofStopper, Origin + (ScaleDir * .5f) + (ScaleDir * i));
             newGP.Dir = ScaleDir;
             newGP.ForcedScale = new Vector3(1, 1, -1f);
             pointsToSpawn.Add(newGP);
@@ -232,11 +239,17 @@ public class RoofPlane
             pointsToSpawn.Add(newGP);
         }
 
-        if (width % 1 != 0)
+        if (width % 1 != 0 && width > 0)
         {
-            GridPoint newGP = new GridPoint(HouseCreatorBase.PointType.HalfRoofStopper, Origin + (ScaleDir * 0.5f) + (ScaleDir * (width - 1f)));
+            //Front
+            GridPoint newGP = new GridPoint(HouseCreatorBase.PointType.HalfRoofStopper, Origin + (ScaleDir * 1f) + (ScaleDir * (width - 1f)));
             newGP.Dir = ScaleDir;
             newGP.ForcedScale = new Vector3(1, 1, -1f);
+            pointsToSpawn.Add(newGP);
+
+            //Back
+            newGP = new GridPoint(HouseCreatorBase.PointType.HalfRoofStopper, Origin + (ScaleDir * 1) + (ScaleDir * (width - 1f)) + (Dir * GetLength()));
+            newGP.Dir = ScaleDir;
             pointsToSpawn.Add(newGP);
         }
 
@@ -321,7 +334,7 @@ public class RoofPlane
             Gizmos.DrawCube(Origin - new Vector3(0,0,Size.z)  + parent.position + (Size / 2f) + Vector3.up * .05f, Size + new Vector3(0, .03f, 0));
         }
 
-        Gizmos.color = Color.black;
+        Gizmos.color = new Color(0,0,0,0.5f);
         Gizmos.DrawCube(Origin + parent.position, new Vector3(0.15f, 0.15f, 0.15f));
     }
 }

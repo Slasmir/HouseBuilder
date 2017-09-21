@@ -10,6 +10,7 @@ public class GridPoint {
     public Vector3 ForcedScale = Vector3.one;
     public bool IsCorner = false;
     public bool IsTop = false;
+    public bool IsSmall = false;
 
     public bool IsHalf()
     {
@@ -128,7 +129,7 @@ public class GridPoint {
         GridObject.transform.Rotate(new Vector3(0, -90f, 0));
         GridObject.transform.localScale = ForcedScale;
 
-        Mesh m = selectedCollection.GetMeshBasedOnPointType(Type,IsTop);
+        Mesh m = selectedCollection.GetMeshBasedOnPointType(Type,IsTop, IsSmall);
         mf.mesh = m;
 
         mr.sharedMaterial = selectedCollection.DefaultMat;
